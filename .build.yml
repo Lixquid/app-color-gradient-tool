@@ -1,0 +1,27 @@
+# SourceHut Build Manifest
+image: alpine/latest
+oauth: pages.sr.ht/PAGES:RW
+packages:
+    - nodejs
+    - yarn
+    - hut
+environment:
+    site: color-gradient-tool.lixquid.com
+sources:
+    - https://github.com/lixquid/app-color-gradient-tool
+tasks:
+    - build: |
+          cd *
+          yarn install
+          yarn build
+          yarn lint
+    - package: |
+          set +x
+          if [ -z "$OAUTH2_TOKEN" ]; then
+              echo "Skipping deploy"
+              exit 0
+          fi
+          set -x
+          cd */dist
+          tar czvf ../dist.tgz *
+          hut pages publish -d $site ../dist.tgz
